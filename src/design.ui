@@ -7,39 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>256</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="currentPositionName">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>30</y>
-      <width>81</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Название</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="currentPositionWeight">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>60</y>
-      <width>81</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Вес</string>
-    </property>
-   </widget>
    <widget class="QListWidget" name="listWidget">
     <property name="geometry">
      <rect>
@@ -47,6 +27,16 @@
       <y>10</y>
       <width>256</width>
       <height>192</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>501</width>
+      <height>191</height>
      </rect>
     </property>
    </widget>
@@ -80,6 +70,11 @@
    </property>
    <property name="text">
     <string>(нет доступных портов)</string>
+   </property>
+  </action>
+  <action name="actiontest2">
+   <property name="text">
+    <string>test2</string>
    </property>
   </action>
  </widget>
