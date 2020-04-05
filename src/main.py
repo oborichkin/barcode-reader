@@ -35,8 +35,7 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
                 if enabled:
                     port_action.setChecked(True)
                 else:
-                    receiver = lambda *args, portName=port: self.comManager.SwitchComPort(portName)
-                    port_action.triggered.connect(receiver)
+                    port_action.triggered.connect(lambda *args, portName=port: self.comManager.SwitchComPort(portName))
                 self.menuCOM.addAction(port_action)
         else:
             self.menuCOM.addAction(self.no_ports)
