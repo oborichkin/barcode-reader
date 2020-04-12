@@ -1,4 +1,6 @@
 import copy
+import datetime
+import os
 import sys
 import time
 from random import choice
@@ -6,14 +8,25 @@ from random import choice
 import design
 import serial
 from comport import ComPortManager
-from PyQt5.QtCore import QObject, Qt, QThread, pyqtSignal, pyqtSlot
+from database import BarcodeDatabase, ProductInfo
+from PyQt5.QtCore import QObject, Qt, QThread, QUrl, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction, QApplication, QMainWindow
+from PyQt5.QtMultimedia import QSoundEffect
+from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QListWidgetItem, QMainWindow
 
 
 class ExampleApp(QMainWindow, design.Ui_MainWindow):
     def __init__(self):
         super().__init__()
+
+        self.db = BarcodeDatabase()
+
+        self.bruh = QSoundEffect()
+        self.bruh.setSource(QUrl.fromLocalFile(os.path.join("resources", "bruh.wav")))
+        self.bruh.setLoopCount(1)
+        self.yuh = QSoundEffect()
+        self.yuh.setSource(QUrl.fromLocalFile(os.path.join("resources", "yuh.wav")))
+        self.yuh.setLoopCount(1)
 
         self.comManager = ComPortManager()
         self.comThread = QThread()
@@ -24,6 +37,9 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
 
         self.setupUi(self)
         self.menuCOM.aboutToShow.connect(self.loadComPortMenu)
+        self.loadDb.triggered.connect(self.loadNewDatabase)
+        self.BarcodeHistory.itemClicked.connect(self.onItemClicked)
+        self.BarcodeHistory.currentItemChanged.connect(self.onItemClicked)
 
     def loadComPortMenu(self):
         self.menuCOM.clear()
@@ -41,7 +57,37 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
             self.menuCOM.addAction(self.no_ports)
 
     def onNewCode(self, code):
-        self.listWidget.addItem(code)
+        try:
+            product = self.dispatchBarcode(code)
+            item = QListWidgetItem(product.name, self.BarcodeHistory)
+            item.setData(32, product)
+            self.BarcodeHistory.addItem(item)
+            self.BarcodeHistory.setCurrentItem(item)
+        except Exception:
+            pass
+
+    def onItemClicked(self, item):
+        product = item.data(32)
+        self.Name.setText(str(product.name))
+        self.Packaging.setText(str(product.packaging))
+        self.Weight.setText(str(product.weight))
+        self.StorageType.setText(str(product.storage_type))
+
+    def loadNewDatabase(self):
+        fname = QFileDialog.getOpenFileName(self, "Open file", "c:\\", "Database files (*.xls)")
+        self.db.read_db_file(fname[0])
+
+    def dispatchBarcode(self, code: str):
+        if len(code) == 13:
+            return self.db[int(code)]
+        elif len(code) == 32:
+            code, weight, date = code[:13], code[13:19], code[19:25]
+            product = self.db[int(code)]
+            product.weight = float(weight)
+            product.date = datetime.datetime.strptime(date, "%d%m%Y").date()
+            return product
+        else:
+            raise Exception
 
 
 def main():

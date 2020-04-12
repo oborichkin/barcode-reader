@@ -25,6 +25,7 @@ def get_available_ports():
 class ComPortManager(QObject):
     newCodeRead = pyqtSignal(str)
     currentPort = None
+    buffer = b""
     _mutex = QMutex()
     SEPARATOR = b"\r"
 
@@ -33,9 +34,10 @@ class ComPortManager(QObject):
         while True:
             if self.currentPort:
                 self._mutex.lock()
-                data = self.currentPort.read_until(self.SEPARATOR)
-                if data:
-                    self.newCodeRead.emit(str(data))
+                self.buffer += self.currentPort.read_until(self.SEPARATOR)
+                if b"\r" in self.buffer:
+                    self.newCodeRead.emit(self.buffer.decode().strip())
+                    self.buffer = b""
                 self._mutex.unlock()
             else:
                 time.sleep(1)
