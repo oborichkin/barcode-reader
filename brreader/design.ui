@@ -150,6 +150,7 @@
      <string>База</string>
     </property>
     <addaction name="loadDb"/>
+    <addaction name="reloadDb"/>
    </widget>
    <addaction name="settings"/>
    <addaction name="database"/>
@@ -171,6 +172,11 @@
   <action name="loadDb">
    <property name="text">
     <string>Загрузить</string>
+   </property>
+  </action>
+  <action name="reloadDb">
+   <property name="text">
+    <string>Обновить</string>
    </property>
   </action>
  </widget>

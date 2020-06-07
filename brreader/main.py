@@ -38,6 +38,7 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.setupUi(self)
         self.menuCOM.aboutToShow.connect(self.loadComPortMenu)
         self.loadDb.triggered.connect(self.loadNewDatabase)
+        self.reloadDb.triggered.connect(self.db.reload)
         self.BarcodeHistory.itemClicked.connect(self.onItemClicked)
         self.BarcodeHistory.currentItemChanged.connect(self.onItemClicked)
 

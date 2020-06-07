@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\src\design.ui'
+# Form implementation generated from reading ui file '.\brreader\design.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.1
 #
@@ -103,9 +103,12 @@ class Ui_MainWindow(object):
         self.actiontest2.setObjectName("actiontest2")
         self.loadDb = QtWidgets.QAction(MainWindow)
         self.loadDb.setObjectName("loadDb")
+        self.reloadDb = QtWidgets.QAction(MainWindow)
+        self.reloadDb.setObjectName("reloadDb")
         self.menuCOM.addAction(self.no_ports)
         self.settings.addAction(self.menuCOM.menuAction())
         self.database.addAction(self.loadDb)
+        self.database.addAction(self.reloadDb)
         self.menubar.addAction(self.settings.menuAction())
         self.menubar.addAction(self.database.menuAction())
 
@@ -128,3 +131,4 @@ class Ui_MainWindow(object):
         self.no_ports.setText(_translate("MainWindow", "(нет доступных портов)"))
         self.actiontest2.setText(_translate("MainWindow", "test2"))
         self.loadDb.setText(_translate("MainWindow", "Загрузить"))
+        self.reloadDb.setText(_translate("MainWindow", "Обновить"))
