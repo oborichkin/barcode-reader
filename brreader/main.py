@@ -4,6 +4,8 @@ import os
 import sys
 import time
 from random import choice
+from typing import List
+from collections import Counter
 
 import design
 import serial
@@ -24,9 +26,6 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.app_config = AppConfig()
         self.db = BarcodeDatabase()
 
-        if config_path:
-            self.app_config.read_config(config_path)
-
         self.comManager = ComPortManager()
         self.comThread = QThread()
         self.comManager.newCodeRead.connect(self.onNewCode)
@@ -38,10 +37,14 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.menuCOM.aboutToShow.connect(self.loadComPortMenu)
         self.loadDb.triggered.connect(self.loadNewDatabase)
         self.reloadDb.triggered.connect(self.db.reload)
+        self.save.triggered.connect(self.onSave)
         self.BarcodeHistory.itemClicked.connect(self.onItemClicked)
         self.BarcodeHistory.currentItemChanged.connect(self.onItemClicked)
 
         self.app_config.dbFileChanged.connect(self.onDbFileChange)
+
+        if os.path.isfile("config.ini"):
+            self.app_config.read_config("config.ini")
 
     def loadComPortMenu(self):
         self.menuCOM.clear()
@@ -81,6 +84,17 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
 
     def onDbFileChange(self, db_file: str):
         self.db.read_db_file(db_file)
+
+    def onSave(self):
+        itemsList: List[Item] = [self.BarcodeHistory.item(i).data(32) for i in range(self.BarcodeHistory.count())]
+        codeList = [item.code for item in itemsList]
+        freq_list = Counter(codeList)
+
+        with open(self.app_config.full_report_file, "w+") as f:
+            f.writelines([str(item.code) + "\n" for item in itemsList])
+
+        with open(self.app_config.report_file, "w+") as f:
+            f.writelines([f"{str(code)};{str(freq)}\n" for code, freq in freq_list.items()])
 
     def dispatchBarcode(self, code: str) -> Item:
         try:

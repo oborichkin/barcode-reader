@@ -16,3 +16,11 @@ class UnsupportedBarcode(ReaderError):
 
 class InvalidBarcode(ReaderError):
     pass
+
+
+class ConfigError(Exception):
+    pass
+
+
+class UnsupportedConfig(ConfigError):
+    pass

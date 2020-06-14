@@ -9,14 +9,15 @@ import xlrd
 
 ProductInfo = namedtuple(
     "ProductInfo",
-    ("name", "storage_type", "packaging", "weight", "date"),
-    defaults=(None, None, None, 0, datetime.datetime.now()),
+    ("code", "name", "storage_type", "packaging", "weight", "date"),
+    defaults=(None, None, None, None, 0, datetime.datetime.now()),
 )
 
 
 class Item:
 
     def __init__(self, prod_info: ProductInfo):
+        self.code = int(prod_info.code)
         self.name = prod_info.name
         self.storage_type = prod_info.storage_type
         self.packaging = prod_info.packaging
@@ -59,7 +60,7 @@ class BarcodeDatabase:
             sheet = rb.sheet_by_index(sheetidx)
             for rownum in range(1, sheet.nrows):
                 values = sheet.row_values(rownum)
-                result[int(values[0])] = ProductInfo(*values[1:])
+                result[int(values[0])] = ProductInfo(*values)
         return result
 
     def _fill_database(self, filepaths: List[str]):

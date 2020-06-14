@@ -152,6 +152,13 @@
     <addaction name="loadDb"/>
     <addaction name="reloadDb"/>
    </widget>
+   <widget class="QMenu" name="file">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="save"/>
+   </widget>
+   <addaction name="file"/>
    <addaction name="settings"/>
    <addaction name="database"/>
   </widget>
@@ -177,6 +184,11 @@
   <action name="reloadDb">
    <property name="text">
     <string>Обновить</string>
+   </property>
+  </action>
+  <action name="save">
+   <property name="text">
+    <string>Сохранить</string>
    </property>
   </action>
  </widget>
