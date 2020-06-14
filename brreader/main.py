@@ -9,6 +9,7 @@ import design
 import serial
 from errors import InvalidBarcode, UnsupportedBarcode, DatabaseException
 from comport import ComPortManager
+from config import AppConfig
 from database import BarcodeDatabase, ProductInfo, Item
 from PyQt5.QtCore import QObject, Qt, QThread, QUrl, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QIcon
@@ -17,10 +18,14 @@ from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QListWidgetItem,
 
 
 class ExampleApp(QMainWindow, design.Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, config_path=None):
         super().__init__()
 
+        self.app_config = AppConfig()
         self.db = BarcodeDatabase()
+
+        if config_path:
+            self.app_config.read_config(config_path)
 
         self.bruh = QSoundEffect()
         self.bruh.setSource(QUrl.fromLocalFile(os.path.join("resources", "bruh.wav")))
@@ -42,6 +47,8 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.reloadDb.triggered.connect(self.db.reload)
         self.BarcodeHistory.itemClicked.connect(self.onItemClicked)
         self.BarcodeHistory.currentItemChanged.connect(self.onItemClicked)
+
+        self.app_config.dbFileChanged.connect(self.onDbFileChange)
 
     def loadComPortMenu(self):
         self.menuCOM.clear()
@@ -77,7 +84,10 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
 
     def loadNewDatabase(self):
         fname = QFileDialog.getOpenFileName(self, "Open file", "c:\\", "Database files (*.xls)")
-        self.db.read_db_file(fname[0])
+        self.app_config.db_file = fname[0]
+
+    def onDbFileChange(self, db_file: str):
+        self.db.read_db_file(db_file)
 
     def dispatchBarcode(self, code: str) -> Item:
         try:
