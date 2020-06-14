@@ -7,12 +7,13 @@ from random import choice
 
 import design
 import serial
+from errors import InvalidBarcode, UnsupportedBarcode, DatabaseException
 from comport import ComPortManager
-from database import BarcodeDatabase, ProductInfo
+from database import BarcodeDatabase, ProductInfo, Item
 from PyQt5.QtCore import QObject, Qt, QThread, QUrl, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QIcon
 from PyQt5.QtMultimedia import QSoundEffect
-from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QListWidgetItem, QMainWindow
+from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QListWidgetItem, QMainWindow, QMessageBox
 
 
 class ExampleApp(QMainWindow, design.Ui_MainWindow):
@@ -64,8 +65,8 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
             item.setData(32, product)
             self.BarcodeHistory.addItem(item)
             self.BarcodeHistory.setCurrentItem(item)
-        except Exception:
-            pass
+        except Exception as e:
+            print(e)
 
     def onItemClicked(self, item):
         product = item.data(32)
@@ -78,17 +79,23 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         fname = QFileDialog.getOpenFileName(self, "Open file", "c:\\", "Database files (*.xls)")
         self.db.read_db_file(fname[0])
 
-    def dispatchBarcode(self, code: str):
-        if len(code) == 13:
-            return self.db[int(code)]
-        elif len(code) == 32:
-            code, weight, date = code[:13], code[13:19], code[19:25]
-            product = self.db[int(code)]
-            product.weight = float(weight)
-            product.date = datetime.datetime.strptime(date, "%d%m%Y").date()
-            return product
-        else:
-            raise Exception
+    def dispatchBarcode(self, code: str) -> Item:
+        try:
+            if len(code) == 13:
+                return Item(self.db[int(code)])
+            elif len(code) == 32:
+                code, weight, date = code[:13], code[13:19], code[19:25]
+                product = Item(self.db[int(code)])
+                product.weight = float(weight)
+                product.date = datetime.datetime.strptime(date, "%d%m%Y").date()
+                return product
+            else:
+                raise UnsupportedBarcode
+        except Exception as e:
+            self.onException(e)
+
+    def onException(self, e):
+        print(e)
 
 
 def main():

@@ -3,6 +3,8 @@ import sys
 from collections import namedtuple
 from typing import Dict, List
 
+from errors import NoSuchCode
+
 import xlrd
 
 ProductInfo = namedtuple(
@@ -12,6 +14,16 @@ ProductInfo = namedtuple(
 )
 
 
+class Item:
+
+    def __init__(self, prod_info: ProductInfo):
+        self.name = prod_info.name
+        self.storage_type = prod_info.storage_type
+        self.packaging = prod_info.packaging
+        self.weight = prod_info.weight
+        self.date = prod_info.date
+
+
 class BarcodeDatabase:
     def __init__(self, filepaths: List[str] = list()):
         self._codemap = {}
@@ -19,7 +31,10 @@ class BarcodeDatabase:
         self._fill_database(filepaths)
 
     def __getitem__(self, key):
-        return self._codemap[key]
+        if key in self:
+            return self._codemap[key]
+        else:
+            raise NoSuchCode(f"No such barcode in database {key}")
 
     def __contains__(self, key):
         return key in self._codemap
@@ -50,7 +65,3 @@ class BarcodeDatabase:
     def _fill_database(self, filepaths: List[str]):
         for filepath in filepaths:
             self.read_db_file(filepath)
-
-
-db = BarcodeDatabase(filepaths=sys.argv[1:])
-print(db._codemap)
