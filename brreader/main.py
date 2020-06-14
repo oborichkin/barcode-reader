@@ -12,6 +12,7 @@ import serial
 from errors import InvalidBarcode, UnsupportedBarcode, DatabaseException
 from comport import ComPortManager
 from config import AppConfig
+from session import Session
 from database import BarcodeDatabase, ProductInfo, Item
 from PyQt5.QtCore import QObject, Qt, QThread, QUrl, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QIcon
@@ -25,6 +26,7 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
 
         self.app_config = AppConfig()
         self.db = BarcodeDatabase()
+        self.session = Session()
 
         self.comManager = ComPortManager()
         self.comThread = QThread()
@@ -38,13 +40,20 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.loadDb.triggered.connect(self.loadNewDatabase)
         self.reloadDb.triggered.connect(self.db.reload)
         self.save.triggered.connect(self.onSave)
+        self.clear.triggered.connect(self.BarcodeHistory.clear)
+        self.clear.triggered.connect(self.session.clear)
         self.BarcodeHistory.itemClicked.connect(self.onItemClicked)
         self.BarcodeHistory.currentItemChanged.connect(self.onItemClicked)
 
         self.app_config.dbFileChanged.connect(self.onDbFileChange)
+        self.session.sessionItemRestore.connect(self.onNewCode)
+        self.comManager.newCodeRead.connect(self.session.new_item)
 
         if os.path.isfile("config.ini"):
             self.app_config.read_config("config.ini")
+            self.comManager.SwitchComPort(self.app_config.port)
+
+        self.session.init_session()
 
     def loadComPortMenu(self):
         self.menuCOM.clear()
@@ -72,11 +81,12 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
             print(e)
 
     def onItemClicked(self, item):
-        product = item.data(32)
-        self.Name.setText(str(product.name))
-        self.Packaging.setText(str(product.packaging))
-        self.Weight.setText(str(product.weight))
-        self.StorageType.setText(str(product.storage_type))
+        if item:
+            product = item.data(32)
+            self.Name.setText(str(product.name))
+            self.Packaging.setText(str(product.packaging))
+            self.Weight.setText(str(product.weight))
+            self.StorageType.setText(str(product.storage_type))
 
     def loadNewDatabase(self):
         fname = QFileDialog.getOpenFileName(self, "Open file", "c:\\", "Database files (*.xls)")

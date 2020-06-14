@@ -157,6 +157,7 @@
      <string>Файл</string>
     </property>
     <addaction name="save"/>
+    <addaction name="clear"/>
    </widget>
    <addaction name="file"/>
    <addaction name="settings"/>
@@ -189,6 +190,11 @@
   <action name="save">
    <property name="text">
     <string>Сохранить</string>
+   </property>
+  </action>
+  <action name="clear">
+   <property name="text">
+    <string>Очистить</string>
    </property>
   </action>
  </widget>
