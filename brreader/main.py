@@ -27,13 +27,6 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         if config_path:
             self.app_config.read_config(config_path)
 
-        self.bruh = QSoundEffect()
-        self.bruh.setSource(QUrl.fromLocalFile(os.path.join("resources", "bruh.wav")))
-        self.bruh.setLoopCount(1)
-        self.yuh = QSoundEffect()
-        self.yuh.setSource(QUrl.fromLocalFile(os.path.join("resources", "yuh.wav")))
-        self.yuh.setLoopCount(1)
-
         self.comManager = ComPortManager()
         self.comThread = QThread()
         self.comManager.newCodeRead.connect(self.onNewCode)
