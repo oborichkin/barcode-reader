@@ -7,6 +7,8 @@ from PyQt5.QtCore import QMutex, QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction
 
+from errors import CouldNotInitPort
+
 ports = [f"COM{i + 1}" for i in range(256)]
 
 
@@ -48,8 +50,13 @@ class ComPortManager(QObject):
         self._mutex.lock()
         if self.currentPort:
             self.currentPort.close()
-        self.currentPort = serial.Serial(port, timeout=1)
-        self._mutex.unlock()
+        try:
+            self.currentPort = serial.Serial(port, timeout=1)
+        except serial.serialutil.SerialException as e:
+            self.currentPort = None
+            raise e
+        finally:
+            self._mutex.unlock()
 
     def GetPortsList(self) -> Dict[str, bool]:
         ports = {port: False for port in get_available_ports()}

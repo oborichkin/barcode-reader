@@ -91,7 +91,11 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.db.read_db_file(db_file)
 
     def onConfigInitialized(self, config):
-        self.db.read_db_file(config.db_file)
+        try:
+            self.db.read_db_file(config.db_file)
+            self.comManager.SwitchComPort(config.com_port)
+        except Exception as e:
+            self.onException(e)
 
     def onSave(self):
         itemsList: List[Item] = [self.BarcodeHistory.item(i).data(32) for i in range(self.BarcodeHistory.count())]

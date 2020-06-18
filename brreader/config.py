@@ -10,14 +10,34 @@ from PyQt5.QtCore import QObject, pyqtSignal
 class AppConfig(QObject):
     CONFIG_FILE_NAME = "config.ini"
     dbFileChanged = pyqtSignal(str)
+    comPortChanged = pyqtSignal(str)
     configInitialized = pyqtSignal(object)
 
     def __init__(self, parent, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dbFileChanged.connect(parent.onDbFileChange)
         self.configInitialized.connect(parent.onConfigInitialized)
+        self.comPortChanged.connect(parent.comManager.SwitchComPort)
         self.config = self._init_config()
         self.configInitialized.emit(self)
+
+    @property
+    def db_file(self):
+        return self.config["DB"]["Path"]
+
+    @db_file.setter
+    def db_file(self, value):
+        self.config["DB"]["Path"] = value
+        self.dbFileChanged.emit(value)
+
+    @property
+    def com_port(self):
+        return self.config["Input"]["Port"]
+
+    @com_port.setter
+    def com_port(self, value):
+        self.config["Input"]["Port"] = value
+        self.comPortChanged.emit(value)
 
     def _init_config(self):
         if os.path.isfile(self.CONFIG_FILE_NAME):
@@ -42,12 +62,3 @@ class AppConfig(QObject):
         }
         config["Input"] = {"Port": "COM1"}
         return config
-
-    @property
-    def db_file(self):
-        return self.config["DB"]["Path"]
-
-    @db_file.setter
-    def db_file(self, value):
-        self.self.config["DB"]["Path"] = value
-        self.dbFileChanged.emit(self._db_file)

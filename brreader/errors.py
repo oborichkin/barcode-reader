@@ -24,3 +24,11 @@ class ConfigError(Exception):
 
 class UnsupportedConfig(ConfigError):
     pass
+
+
+class ComPortError(Exception):
+    pass
+
+
+class CouldNotInitPort(ComPortError):
+    pass
