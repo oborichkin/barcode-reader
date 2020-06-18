@@ -24,7 +24,6 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
     def __init__(self, config_path=None):
         super().__init__()
 
-        self.app_config = AppConfig()
         self.db = BarcodeDatabase()
         self.session = Session()
 
@@ -45,13 +44,9 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.BarcodeHistory.itemClicked.connect(self.onItemClicked)
         self.BarcodeHistory.currentItemChanged.connect(self.onItemClicked)
 
-        self.app_config.dbFileChanged.connect(self.onDbFileChange)
+        self.app_config = AppConfig(parent=self)
         self.session.sessionItemRestore.connect(self.onNewCode)
         self.comManager.newCodeRead.connect(self.session.new_item)
-
-        if os.path.isfile("config.ini"):
-            self.app_config.read_config("config.ini")
-            self.comManager.SwitchComPort(self.app_config.port)
 
         self.session.init_session()
 
@@ -94,6 +89,9 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
 
     def onDbFileChange(self, db_file: str):
         self.db.read_db_file(db_file)
+
+    def onConfigInitialized(self, config):
+        self.db.read_db_file(config.db_file)
 
     def onSave(self):
         itemsList: List[Item] = [self.BarcodeHistory.item(i).data(32) for i in range(self.BarcodeHistory.count())]
