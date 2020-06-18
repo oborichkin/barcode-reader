@@ -1,6 +1,7 @@
 import json
 import os
 import configparser
+from functools import wraps
 
 from errors import ConfigError, UnsupportedConfig
 
@@ -21,11 +22,19 @@ class AppConfig(QObject):
         self.config = self._init_config()
         self.configInitialized.emit(self)
 
+    def save_config(func):
+        @wraps(func)
+        def wrapper(obj, *args, **kwargs):
+            func(obj, *args, **kwargs)
+            obj._dump_config()
+        return wrapper
+
     @property
     def db_file(self):
         return self.config["DB"]["Path"]
 
     @db_file.setter
+    @save_config
     def db_file(self, value):
         self.config["DB"]["Path"] = value
         self.dbFileChanged.emit(value)
@@ -35,20 +44,10 @@ class AppConfig(QObject):
         return self.config["Input"]["Port"]
 
     @com_port.setter
+    @save_config
     def com_port(self, value):
         self.config["Input"]["Port"] = value
         self.comPortChanged.emit(value)
-
-    def _init_config(self):
-        if os.path.isfile(self.CONFIG_FILE_NAME):
-            config = configparser.ConfigParser()
-            config.read(self.CONFIG_FILE_NAME)
-            return config
-        else:
-            config = self.default_config
-            with open(self.CONFIG_FILE_NAME, "w") as f:
-                config.write(f)
-            return config
 
     @property
     def default_config(self):
@@ -62,3 +61,18 @@ class AppConfig(QObject):
         }
         config["Input"] = {"Port": "COM1"}
         return config
+
+    def _init_config(self):
+        if os.path.isfile(self.CONFIG_FILE_NAME):
+            config = configparser.ConfigParser()
+            config.read(self.CONFIG_FILE_NAME)
+            return config
+        else:
+            config = self.default_config
+            with open(self.CONFIG_FILE_NAME, "w") as f:
+                config.write(f)
+            return config
+
+    def _dump_config(self):
+        with open(self.CONFIG_FILE_NAME, "w") as f:
+            self.config.write(f)
