@@ -34,6 +34,7 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.comThread.started.connect(self.comManager.ComReader)
         self.comThread.start()
 
+        self.setupSound()
         self.setupUi(self)
         self.menuCOM.aboutToShow.connect(self.loadComPortMenu)
         self.loadDb.triggered.connect(self.loadNewDatabase)
@@ -49,6 +50,18 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.comManager.newCodeRead.connect(self.session.new_item)
 
         self.session.init_session()
+
+    def setupSound(self):
+        good = QSoundEffect(self)
+        good.setSource(QUrl.fromLocalFile(os.path.join("resources", "good.wav")))
+        good.setLoopCount(1)
+        bad = QSoundEffect(self)
+        bad.setSource(QUrl.fromLocalFile(os.path.join("resources", "bad.wav")))
+        bad.setLoopCount(1)
+        self.sounds = {
+            'good': good,
+            'bad': bad
+        }
 
     def loadComPortMenu(self):
         self.menuCOM.clear()
@@ -72,7 +85,9 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
             item.setData(32, product)
             self.BarcodeHistory.addItem(item)
             self.BarcodeHistory.setCurrentItem(item)
+            self.sounds["good"].play()
         except Exception as e:
+            self.sounds["bad"].play()
             print(e)
 
     def onItemClicked(self, item):
