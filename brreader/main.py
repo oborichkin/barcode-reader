@@ -129,6 +129,9 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    if os.path.isfile("style.css"):
+        with open("style.css") as f:
+            app.setStyleSheet(f.read())
     window = ExampleApp()
     window.show()
     app.exec_()
