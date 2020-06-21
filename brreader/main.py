@@ -36,12 +36,18 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
 
         self.setupSound()
         self.setupUi(self)
+
+        # Temp button actions assignment
+        self.exitButton.clicked.connect(self.close)
+        self.clearButton.clicked.connect(self.clearSessionData)
+        self.openDbButton.clicked.connect(self.loadNewDatabase)
+        self.saveButton.clicked.connect(self.onSave)
+
         self.menuCOM.aboutToShow.connect(self.loadComPortMenu)
         self.loadDb.triggered.connect(self.loadNewDatabase)
         self.reloadDb.triggered.connect(self.db.reload)
         self.save.triggered.connect(self.onSave)
-        self.clear.triggered.connect(self.BarcodeHistory.clear)
-        self.clear.triggered.connect(self.session.clear)
+        self.clear.triggered.connect(self.clearSessionData)
         self.BarcodeHistory.itemClicked.connect(self.onItemClicked)
         self.BarcodeHistory.currentItemChanged.connect(self.onItemClicked)
 
@@ -138,12 +144,19 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         except Exception as e:
             self.onException(e)
 
+    def clearSessionData(self):
+        self.BarcodeHistory.clear()
+        self.session.clear()
+
     def onException(self, e):
         print(e)
 
 
 def main():
     app = QApplication(sys.argv)
+    if os.path.isfile("style.css"):
+        with open("style.css") as f:
+            app.setStyleSheet(f.read())
     window = ExampleApp()
     window.show()
     app.exec_()
