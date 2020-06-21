@@ -58,11 +58,12 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
         self.session.init_session()
 
     def setupSound(self):
+        print(os.getcwd())
         good = QSoundEffect(self)
-        good.setSource(QUrl.fromLocalFile(os.path.join("resources", "good.wav")))
+        good.setSource(QUrl.fromLocalFile(os.path.join("sound", "good.wav")))
         good.setLoopCount(1)
         bad = QSoundEffect(self)
-        bad.setSource(QUrl.fromLocalFile(os.path.join("resources", "bad.wav")))
+        bad.setSource(QUrl.fromLocalFile(os.path.join("sound", "bad.wav")))
         bad.setLoopCount(1)
         self.sounds = {
             'good': good,

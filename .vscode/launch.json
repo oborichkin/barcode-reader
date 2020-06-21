@@ -5,9 +5,9 @@
             "name": "Python: Main Qt",
             "type": "python",
             "request": "launch",
-            "program": "../brreader/main.py",
+            "program": "C:\\Users\\Valenti\\source\\barcode-reader\\brreader\\main.py",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/data"
+            "cwd": "${workspaceFolder}/resources"
         }
     ]
 }
