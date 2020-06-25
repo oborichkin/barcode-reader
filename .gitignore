@@ -131,4 +131,6 @@ dmypy.json
 *.wav
 *.xls
 
+/.vscode
+
 .session

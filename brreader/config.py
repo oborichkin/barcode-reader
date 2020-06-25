@@ -30,6 +30,18 @@ class AppConfig(QObject):
         return wrapper
 
     @property
+    def report_file(self):
+        return self.config["Output"]["textreport"]
+
+    @property
+    def full_report_file(self):
+        return self.config["Output"]["fulltextreport"]
+
+    @property
+    def report_xls(self):
+        return self.config["Output"]["xlsreport"]
+
+    @property
     def db_file(self):
         return self.config["DB"]["Path"]
 
@@ -56,8 +68,7 @@ class AppConfig(QObject):
         config["Output"] = {
             "TextReport": "report.txt",
             "FullTextReport": "full-report.txt",
-            "XlsReport": "report.xls",
-            "FullXlsReport": "full-report.xls"
+            "XlsReport": "report.xls"
         }
         config["Input"] = {"Port": "COM1"}
         return config

@@ -207,6 +207,7 @@
     <property name="title">
      <string>База</string>
     </property>
+    <addaction name="openDb"/>
     <addaction name="loadDb"/>
     <addaction name="reloadDb"/>
    </widget>
@@ -253,6 +254,11 @@
   <action name="clear">
    <property name="text">
     <string>Очистить</string>
+   </property>
+  </action>
+  <action name="openDb">
+   <property name="text">
+    <string>Изменить</string>
    </property>
   </action>
  </widget>

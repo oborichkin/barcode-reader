@@ -26,10 +26,8 @@ class Item:
 
 
 class BarcodeDatabase:
-    def __init__(self, filepaths: List[str] = list()):
+    def __init__(self):
         self._codemap = {}
-        self._filepaths = filepaths
-        self._fill_database(filepaths)
 
     def __getitem__(self, key):
         if key in self:
@@ -43,11 +41,8 @@ class BarcodeDatabase:
     def clear(self):
         self._codemap.clear()
 
-    def reload(self):
+    def load(self, filepath: str):
         self.clear()
-        self._fill_database(self.filepaths)
-
-    def read_db_file(self, filepath: str):
         if filepath.endswith(".xls"):
             self._codemap.update(BarcodeDatabase._from_xls(filepath))
         else:
@@ -62,7 +57,3 @@ class BarcodeDatabase:
                 values = sheet.row_values(rownum)
                 result[int(values[0])] = ProductInfo(*values)
         return result
-
-    def _fill_database(self, filepaths: List[str]):
-        for filepath in filepaths:
-            self.read_db_file(filepath)

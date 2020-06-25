@@ -3,6 +3,7 @@ import datetime
 import os
 import sys
 import time
+import xlwt
 from random import choice
 from typing import List
 from collections import Counter
@@ -45,7 +46,8 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
 
         self.menuCOM.aboutToShow.connect(self.loadComPortMenu)
         self.loadDb.triggered.connect(self.loadNewDatabase)
-        self.reloadDb.triggered.connect(self.db.reload)
+        self.openDb.triggered.connect(self.onEditDbFile)
+        self.reloadDb.triggered.connect(self.onReloadDb)
         self.save.triggered.connect(self.onSave)
         self.clear.triggered.connect(self.clearSessionData)
         self.BarcodeHistory.itemClicked.connect(self.onItemClicked)
@@ -107,28 +109,66 @@ class ExampleApp(QMainWindow, design.Ui_MainWindow):
 
     def loadNewDatabase(self):
         fname = QFileDialog.getOpenFileName(self, "Open file", "c:\\", "Database files (*.xls)")
-        self.app_config.db_file = fname[0]
+        if fname[0]:
+            self.app_config.db_file = fname[0]
 
     def onDbFileChange(self, db_file: str):
-        self.db.read_db_file(db_file)
+        self.db.load(db_file)
+
+    def onReloadDb(self):
+        self.db.load(self.app_config.db_file)
 
     def onConfigInitialized(self, config):
         try:
-            self.db.read_db_file(config.db_file)
+            self.db.load(config.db_file)
             self.comManager.SwitchComPort(config.com_port)
         except Exception as e:
             self.onException(e)
 
+    def onEditDbFile(self):
+        os.system(self.app_config.db_file)
+        self.db.load(self.app_config.db_file)
+
     def onSave(self):
         itemsList: List[Item] = [self.BarcodeHistory.item(i).data(32) for i in range(self.BarcodeHistory.count())]
         codeList = [item.code for item in itemsList]
+        unique_codes = set(codeList)
         freq_list = Counter(codeList)
+        fields = ("Код", "Название", "Тип", "Упаковка", "Вес")
+        full_fields = ("Код", "Название", "Тип", "Упаковка", "Количество", "Вес")
 
         with open(self.app_config.full_report_file, "w+") as f:
             f.writelines([str(item.code) + "\n" for item in itemsList])
 
         with open(self.app_config.report_file, "w+") as f:
             f.writelines([f"{str(code)};{str(freq)}\n" for code, freq in freq_list.items()])
+
+        workbook = xlwt.Workbook()
+
+        worksheet = workbook.add_sheet('Полный Отчет')
+        for i, fieldname in enumerate(fields):
+            worksheet.write(0, i, fieldname)
+
+        for row_index, item in enumerate(itemsList):
+            worksheet.write(row_index + 1, 0, item.code)
+            worksheet.write(row_index + 1, 1, item.name)
+            worksheet.write(row_index + 1, 2, item.storage_type)
+            worksheet.write(row_index + 1, 3, item.packaging)
+            worksheet.write(row_index + 1, 4, item.weight)
+
+        worksheet = workbook.add_sheet('Количественный Отчет')
+        for i, fieldname in enumerate(full_fields):
+            worksheet.write(0, i, fieldname)
+
+        for row_index, code in enumerate(unique_codes):
+            worksheet.write(row_index + 1, 0, code)
+            worksheet.write(row_index + 1, 1, self.db[code].name)
+            worksheet.write(row_index + 1, 2, self.db[code].storage_type)
+            worksheet.write(row_index + 1, 3, self.db[code].packaging)
+            worksheet.write(row_index + 1, 4, freq_list[code])
+            worksheet.write(row_index + 1, 5, sum([int(item.weight) for item in itemsList if item.code == code]))
+
+        workbook.save(self.app_config.report_xls)
 
     def dispatchBarcode(self, code: str) -> Item:
         try:
